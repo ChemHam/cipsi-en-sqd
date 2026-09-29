@@ -8,13 +8,6 @@ from .arrays import det_strings, safe_array
 
 
 def lucj_operator(t2, ts, n_reps, open_shell):
-    """The LUCJ operator at one amplitude scaling.
-
-    Open shell wants t1 = (a, b) and t2 = (aa, ab, bb); closed shell wants
-    one array of each. from_t_amplitudes reads the orbital count off their
-    shapes, so a window of the wrong width builds a circuit of the wrong
-    width and qc.append raises.
-    """
     if open_shell:
         return ffsim.UCJOpSpinUnbalanced.from_t_amplitudes(
             t2=tuple(x * ts for x in t2), n_reps=(n_reps, n_reps))
@@ -23,16 +16,6 @@ def lucj_operator(t2, ts, n_reps, open_shell):
 
 def sample_bsm(norb, nelec, t1, t2, n_shots, noise_level=0.1, seed=42,
                scalings=(0.5, 1.0, 1.5, 2.0), n_reps=8, report=True):
-    """Sample the seed configurations from the LUCJ state.
-
-    The circuit is averaged over the amplitude scalings, then ten percent
-    uniform noise is mixed in and the distribution is sampled.
-
-    A scaling that raises stops the run. The notebook caught them with a bare
-    except and fell back to a delta on Hartree-Fock, which still yields
-    configurations and still produces energies, so a scan that never built a
-    circuit looked like one that did. That is how the open-shell scans ran.
-    """
     # t2 decides, not t1: the ansatz is built from t2 alone, and t1 is None
     # whenever the amplitudes came from MP2.
     open_shell = isinstance(t2, (tuple, list))
