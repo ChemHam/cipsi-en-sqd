@@ -1,12 +1,4 @@
-"""Scan parameters, read from an input file and bound into the library.
-
-The functions in this package are the notebook's, carried over without being
-retyped, and several of them read their parameters as module globals rather
-than as arguments. Rewriting those reads would have meant editing bodies that
-produced published results, so instead the parameters are bound into each
-module's namespace before a run starts. bind() is the only place that writes
-them, and load() is the only place that reads the input file.
-"""
+"""Scan parameters, read from an input file and bound into the library."""
 
 from __future__ import annotations
 
