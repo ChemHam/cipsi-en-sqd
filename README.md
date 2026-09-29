@@ -1,141 +1,72 @@
 # CIPSI-EN-SQD
 
-**Epstein–Nesbet perturbative selection for sample-based quantum diagonalization**
+Code and data for
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Data: CSV](https://img.shields.io/badge/data-CSV-blue.svg)](data/)
+> H. Ham, C. G. Kumar, M. Kim, J. Y. Lee, *Compact and accurate quantum-centric excited-state simulations via perturbative configuration selection: closed- and open-shell molecular benchmarks* (submitted to J. Chem. Theory Comput.).
 
-CIPSI-EN-SQD augments sample-based quantum diagonalization (SQD) with a two-stage
-configuration selection: a broad coupling-based expansion followed by an
-Epstein–Nesbet perturbative screening. This repository contains the numerical data
-underlying all figures and tables of the manuscript.
+CIPSI-EN-SQD grows the subspace of extended sample-based quantum diagonalization (Ext-SQD) iteratively and admits a candidate configuration only if an Epstein–Nesbet-type estimate of its contribution to one of the target states exceeds a threshold. The method, its parameters and the analysis of the data are described in the paper; this file only explains how to run the code and how the data are organized.
 
----
+## Requirements
 
-## Systems
+```
+pyscf==2.10.0
+qiskit==1.4.4
+ffsim==0.0.60
+qiskit-addon-sqd==0.12.0
+numpy==2.2.6
+```
 
-| Directory | System | Active space | Scan coordinate |
-|---|---|---|---|
-| [`data/N2`](data/N2) | N₂ | (10e, 16o) | Bond length |
-| [`data/OH`](data/OH) | OH | (7e, 18o) | Bond length |
-| [`data/CN`](data/CN) | CN | (9e, 16o) | Bond length |
-| [`data/LiO2`](data/LiO2) | LiO₂ | (13e, 14o) | Bond length |
-| [`data/C2H4`](data/C2H4) | C₂H₄ | (12e, 14o) | Torsional angle |
-
-All calculations use the cc-pVDZ basis set. Reference values (`FCI`) are obtained by
-exact diagonalization within the stated active space.
-
-**State labelling.** Variational roots are assigned to reference states by maximum
-squared overlap with the corresponding FCI eigenvector, *not* by energy ordering.
-The full overlap matrices are provided in `*_rootoverlap.csv` (OH and CN).
-
----
-
-## File descriptions
-
-### `*_pes.csv` — energies and spin expectation values
-
-One row per geometry × electronic state. This is the primary data behind the potential
-energy curves reported in the manuscript.
-
-| Column | Description |
-|---|---|
-| `R_angstrom` | Bond length (Å). For C₂H₄ this column is `twist_angle_deg`, the torsional angle in degrees. |
-| `state` | Electronic state label (`S0`, `T1`, … for closed-shell systems; `D0`, `D1`, `D2`, `Q1` for open-shell systems). |
-| `E_FCI_Ha` | Reference energy from exact diagonalization in the active space (Hartree). |
-| `E_ExtSQD_Ha` | Extended-SQD energy (Hartree). |
-| `E_CIPSI_EN_SQD_Ha` | CIPSI-EN-SQD energy (Hartree). |
-| `err_ExtSQD_mHa` | `E_ExtSQD − E_FCI`, in millihartree. |
-| `err_CIPSI_EN_SQD_mHa` | `E_CIPSI_EN_SQD − E_FCI`, in millihartree. |
-| `S2_FCI`, `S2_ExtSQD`, `S2_CIPSI_EN_SQD` | Spin expectation value ⟨S²⟩ for each method. |
-
-### `*_dims.csv` — subspace dimensions and diagnostics
-
-One row per geometry.
-
-| Column | Description |
-|---|---|
-| `dim_SQD_alpha`, `dim_SQD_beta` | Number of α / β determinants in the SQD subspace. |
-| `dim_ExtSQD_alpha`, `dim_ExtSQD_beta` | Same, after the Ext-SQD expansion. |
-| `dim_CIPSI_EN_SQD_alpha`, `dim_CIPSI_EN_SQD_beta` | Same, after CIPSI-EN selection. |
-| `shots`, `n_seeds` | Sampling parameters. |
-| `n_missing` | Determinants present in the Ext-SQD space but discarded by CIPSI-EN selection. |
-| `n_important_missing` | Discarded determinants whose weight exceeds the significance threshold. |
-| `max_missing_weight` | Largest weight among discarded determinants. |
-| `ext_recovery_pct`, `cipsi_recovery_pct` | Fraction of the FCI wavefunction weight recovered (%). |
-| `efficiency_ratio` | Recovered weight per determinant, relative to Ext-SQD. |
-| `selectivity_ratio` | Ratio of retained to discarded weight. |
-
-### `*_natocc.csv` — natural orbital occupations
-
-Long format: one row per geometry × method × orbital.
-
-| Column | Description |
-|---|---|
-| `method` | `ref` (SQD), `ext` (Ext-SQD), or `cipsi` (CIPSI-EN-SQD). |
-| `orbital_index` | Natural orbital index, ordered by decreasing occupation. |
-| `occupation` | Natural orbital occupation number. |
-
-### `*_convergence.csv` — CIPSI iteration trajectory
-
-| Column | Description |
-|---|---|
-| `iteration` | Iteration index, or `final` for the converged result. |
-| `n_determinants` | Subspace dimension at that iteration. |
-| `mode` | Selection mode: `seed-broad` (initial broad expansion) or `EN+broad` (combined). |
-
-### `*_recovery.csv` — cumulative wavefunction recovery
-
-| Column | Description |
-|---|---|
-| `n_configs` | Number of determinants included, sorted by decreasing weight. |
-| `cumulative_weight` | Cumulative squared amplitude recovered. |
-
-### `*_rootoverlap.csv` — root-to-state assignment (OH, CN only)
-
-Evidence for the overlap-based state labelling described above.
-
-| Column | Description |
-|---|---|
-| `method` | `ExtSQD` or `CIPSI_EN_SQD`. |
-| `root_index` | Index of the variational root, ordered by energy. |
-| `E_root_Ha` | Energy of that root (Hartree). |
-| `overlap_sq_<state>` | Squared overlap between the root and each FCI reference state. |
-
----
-
-## Computational details
-
-| Setting | Value |
-|---|---|
-| Basis set | cc-pVDZ |
-| CIPSI amplitude cutoff (`ACUT`) | 3 × 10⁻³ |
-| Broad selection threshold (`eps_broad`) | 5 × 10⁻⁴ |
-| Epstein–Nesbet threshold (`eps_EN`) | 1 × 10⁻⁶ |
-| Software | PySCF 2.12.1, ffsim, qiskit-addon-sqd |
-
-Per-geometry sampling parameters (`shots`, `n_seeds`) are recorded in `*_dims.csv`.
-
----
+These are the versions used for every calculation in the paper.
 
 ## Usage
 
-```python
-import pandas as pd
+OH, CN and LiO2 were computed with `run_scan.py`:
 
-pes = pd.read_csv("data/N2/n2_16o_pes.csv")
-s0 = pes[pes.state == "S0"]
-print(s0[["R_angstrom", "err_ExtSQD_mHa", "err_CIPSI_EN_SQD_mHa"]])
+```bash
+python run_scan.py inputs/oh_18o.json                          # whole scan
+python run_scan.py inputs/cn_16o.json --geometries 2.90        # one geometry
+python run_scan.py inputs/lio2_14o.json --geometries 1.4:2.0   # a range
 ```
 
----
+Each geometry is written to `results/<name>/R_<value>.json` as soon as it finishes, together with `results/<name>/meta.json` (package versions and all settings). A scan that is stopped resumes where it left off; `--redo` recomputes existing geometries and `--threads` sets the number of PySCF threads (default 24, overridden by `OMP_NUM_THREADS`). All settings of a system (active space, geometries, target states, sampling and selection parameters) are in its input file under `inputs/`.
 
-## License
+N2 and C2H4 were computed with the notebooks `notebooks/sqd_n2.ipynb` and `notebooks/sqd_c2h4.ipynb`, which carry the same settings and write the whole scan to one file.
 
-Released under the [MIT License](LICENSE).
+## Data
 
-## Funding
+`data/<System>/` holds the results reported in the paper, one zip archive per system (LiO2 in two parts). Each archive contains one JSON file per geometry:
 
-Supported by the Basic Science Research Program through the National Research
-Foundation of Korea (NRF), funded by the Ministry of Education
-(No. RS-2019-NR040081).
+| System | Active space | Scan | Files |
+|---|---|---|---|
+| N2 | (10e, 16o) | *R* = 0.8–3.0 Å, 31 points | `R_0.800.json` … |
+| C2H4 | (12e, 14o) | *θ* = 0–180°, 19 points | `theta_0.000.json` … |
+| OH | (7e, 18o) | *R* = 0.7–3.0 Å, 32 points | `R_0.700.json` … |
+| CN | (9e, 16o) | *R* = 1.0–3.0 Å, 26 points | `R_1.000.json` … |
+| LiO2 | (13e, 14o) | *R*(Li–O2 midpoint) = 1.4–5.0 Å, 43 points | `R_1.400.json` … |
+
+All use cc-pVDZ with frozen 1s cores. Unzip the archives of a system into one folder before use. `meta.json` (OH, CN, LiO2) records the environment and settings of the run.
+
+Main fields of each JSON file (energies in hartree, total energies):
+
+| Key | Content |
+|---|---|
+| `R` | scan coordinate (the dihedral angle in degrees for C2H4) |
+| `fci`, `ext_sqd`, `cipsi` | energy of each target state from FCI, Ext-SQD and CIPSI-EN-SQD |
+| `fci_s2`, `ext_s2`, `cipsi_s2` | ⟨S²⟩ of each target state |
+| `dims` | numbers of α and β strings of the SQD seed (`sqd_a`, `sqd_b`), Ext-SQD (`ext_a`, `ext_b`) and CIPSI-EN-SQD (`cipsi_a`, `cipsi_b`); the subspace dimension is the product |
+| `wf_amps` | for each target state, the α- and β-string weights over the full string space from FCI (`ref_a`, `ref_b`), Ext-SQD (`ext_a`, `ext_b`) and CIPSI-EN-SQD (`cipsi_a`, `cipsi_b`); `wf_amps_meta` gives the full string counts |
+| `cipsi_convergence` | subspace size, and energies where stored, at each iteration of the selection |
+| `all_var_roots` | (OH, CN, LiO2) energies of all variational roots and their squared overlaps with each FCI target state |
+| `strings` | (OH, CN, LiO2) the retained α and β strings of both methods |
+
+The target states are S0, T1, T2 for N2; S0, S1, S2, T1, T2 for C2H4; and D0, D1, D2, Q1 for the radicals. The quantities in Table S1 (exclusive-region weight, uncovered reference weight) and in Figures 6 and S2–S4 are computed from `wf_amps` as defined in the paper; the `wf_analysis` field is an earlier diagnostic referenced to the lowest Ext-SQD root and is not what the paper reports.
+
+**N2 at R = 2.00 Å.** This point is the reference run of Table S2 (`"source"` field in the file), which replaces the point of the original scan so that Table S1 and Table S2 refer to the same calculation. The N2 pipeline is not bit-reproducible at a fixed random seed.
+
+## Earlier version
+
+The code and data of the original submission, which contained an error in the LUCJ sampling of the open-shell systems, are preserved under the tag [`v1-initial-submission`](https://github.com/ChemHam/cipsi-en-sqd/tree/v1-initial-submission).
+
+## License and funding
+
+MIT License. This work was supported by the Basic Science Research Program through the National Research Foundation of Korea (NRF) funded by the Ministry of Education (No. RS-2019-NR040081).
