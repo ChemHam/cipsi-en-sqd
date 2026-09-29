@@ -1,10 +1,3 @@
-"""Spin classification and per-determinant marginals.
-
-Extracted verbatim from the production notebook pipeline. The function bodies
-are byte-identical to the versions that produced the published scans; nothing
-in this file has been retyped. Deliberate changes are marked FIX and listed in
-CHANGES.md.
-"""
 
 import numpy as np
 from pyscf import fci
