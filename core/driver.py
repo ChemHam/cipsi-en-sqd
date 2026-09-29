@@ -452,10 +452,6 @@ def compute_point(R, system, REF_NROOTS=None):
         eo = wf_analysis.get("categories", {}).get("ext_only", {})
         print(f"    [WF] Ext: {wf_analysis['ext_recovery_pct']:.2f}% | CIPSI: {wf_analysis['cipsi_recovery_pct']:.2f}% | "
               f"eff: {wf_analysis.get('efficiency_ratio', 0):.1f}x | ext-only: {eo.get('n', 0)} ({eo.get('pct', 0):.4f}%)")
-
-    # The subspace is the product of the two string sets, so its dimension is
-    # their product. max() was reporting the larger of the two, which for CN
-    # at 2.90 A gave 4356 where the subspace holds 7,927,920 determinants.
     dim_ext = len(ext_a) * len(ext_b)
     dim_cipsi = len(basis_a) * len(basis_b)
     print(f"  Ref:{dt_fci:.0f}s  SQD({len(sqd_a)},{len(sqd_b)}):{dt_sqd:.0f}s  "
