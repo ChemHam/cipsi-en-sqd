@@ -1,10 +1,4 @@
-"""Bitstring and determinant-string helpers.
-
-Extracted verbatim from the production notebook pipeline. The function bodies
-are byte-identical to the versions that produced the published scans; nothing
-in this file has been retyped. Deliberate changes are marked FIX and listed in
-CHANGES.md.
-"""
+"""Bitstring and determinant-string helpers."""
 
 import numpy as np
 from pyscf.fci import cistring
