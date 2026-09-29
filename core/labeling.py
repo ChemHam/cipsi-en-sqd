@@ -1,11 +1,3 @@
-"""Assignment of variational roots to reference state labels.
-
-Extracted verbatim from the production notebook pipeline. The function bodies
-are byte-identical to the versions that produced the published scans; nothing
-in this file has been retyped. Deliberate changes are marked FIX and listed in
-CHANGES.md.
-"""
-
 import numpy as np
 from pyscf.fci import selected_ci
 
@@ -23,12 +15,6 @@ MAX_HIGH = None
 
 
 def label_states_fci(solver, e_list, c_list, norb, nelec, e_core):
-    """FCI labelling. Spin contamination is negligible in the full space.
-
-    The multiplicity pair comes from SPIN_TAGS, as it does for the variational
-    states: testing for doublets when the system is closed shell leaves every
-    root unlabelled and there is then nothing to compare against.
-    """
     low_tag, high_tag = SPIN_TAGS
     low_pre, high_pre = MULTIPLICITY[low_tag][2], MULTIPLICITY[high_tag][2]
     labeled, s2_dict, idx_map = {}, {}, {}
@@ -81,16 +67,6 @@ def label_states_by_overlap(c_var_list, e_var_list, ci_strs_var,
                              strsa_full, strsb_full,
                              norb, nelec, e_core, target_states,
                              overlap_floor=0.30, verbose=False):
-    """Label variational states by overlap with FCI states.
-
-    Greedy matching: (label, k) pairs are sorted by |<FCI|var>|^2 (descending),
-    then the first unassigned (lb, k) is taken. Each variational root is used at
-    most once. Pairs with overlap^2 < overlap_floor are rejected (label remains
-    unmatched).
-
-    Returns (labeled, s2_dict, idx_map). Drop-in replacement for the original
-    label_states_sci with the same signature.
-    """
     var_a, var_b = ci_strs_var
     full_a_map = {int(s): i for i, s in enumerate(strsa_full)}
     full_b_map = {int(s): i for i, s in enumerate(strsb_full)}
@@ -155,11 +131,6 @@ def debug_overlap_matrix(c_var_list, ci_strs_var, c_fci_list, fci_idx_map,
 
 
 def label_states_sci(myci, e_list, c_list, norb, nelec, e_core):
-    """Label roots by spin. S0/T1 for a closed shell, D0/Q1 for an open one.
-
-    The notebook hard-coded one pair per system; the pair now comes from
-    SPIN_TAGS, and MAX_LOW and MAX_HIGH are how many of each to take.
-    """
     low_tag, high_tag = SPIN_TAGS
     low_pre = MULTIPLICITY[low_tag][2]
     high_pre = MULTIPLICITY[high_tag][2]
@@ -185,13 +156,6 @@ def label_states_sci(myci, e_list, c_list, norb, nelec, e_core):
     return labeled, s2_dict, idx_map
 
 def assign_states(mode, myci, **kw):
-    """Pick the labelling the input file asked for.
-
-    The two routines take different arguments: the overlap one needs the FCI
-    eigenvectors and the full string lists, the spin one needs the solver.
-    Both sets are in scope at every call site, so this takes the union and
-    passes on what each needs.
-    """
     if mode == "overlap":
         return label_states_by_overlap(
             kw["c_var_list"], kw["e_var_list"], kw["ci_strs_var"],
