@@ -5,10 +5,6 @@
     python run_scan.py inputs/cn_16o.json
     python run_scan.py inputs/cn_16o.json --geometries 2.90
     python run_scan.py inputs/oh_18o.json --geometries 1.0:1.6 --out results/oh_a
-
-Each geometry is written as soon as it finishes, so a run can be stopped and
-picked up again, and several can share a system by taking different slices of
-the geometry list.
 """
 
 import argparse
