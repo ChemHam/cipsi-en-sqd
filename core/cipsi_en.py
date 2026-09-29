@@ -1,10 +1,4 @@
-"""Perturbative selection and the single-and-double subspace expansion.
-
-Extracted verbatim from the production notebook pipeline. The function bodies
-are byte-identical to the versions that produced the published scans; nothing
-in this file has been retyped. Deliberate changes are marked FIX and listed in
-CHANGES.md.
-"""
+"""Perturbative selection and the single-and-double subspace expansion."""
 
 import numpy as np
 import itertools
