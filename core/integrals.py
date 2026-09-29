@@ -31,31 +31,7 @@ def active_space(mf, cfg):
 
 
 def amplitudes(mf, cfg, spin):
-    """CCSD amplitudes cut to the active space.
-
-    Closed shell gives one array of each rank. Open shell gives
-    t1 = (a, b) and t2 = (aa, ab, bb), whose shapes differ because the spins
-    have different occupations; getting that wrong is what disabled the
-    circuits in the published open-shell scans. No fallback: a CCSD that
-    fails has no amplitudes.
-    """
     na, nb = cfg.nelec
-
-    # CCSD first, MP2 if it does not converge. CCSD stops converging across
-    # the dissociation region of the open-shell benchmarks: for LiO2 it fails
-    # at every geometry beyond 2.70 A, and for CN it converges to different
-    # branches at neighbouring points, so the correlation energy jumps by more
-    # than 0.1 Ha between them. MP2 has no iteration and therefore no second
-    # solution to fall into, and its t2 in the active space matches CCSD's
-    # where CCSD does converge.
-    #
-    # Only t2 is used downstream: the UCJ ansatz comes from a double
-    # factorization of T2, and t1 would only initialize a final orbital
-    # rotation, which this ansatz does not include. MP2 has t1 = 0 by
-    # Brillouin, so nothing is lost by taking its amplitudes.
-    #
-    # Which one was used is returned, not just printed, so that a scan says
-    # per geometry what its circuit was built from.
     mycc = cc.CCSD(mf, frozen=cfg.ncore)
     mycc.conv_tol = cfg.ccsd_conv_tol
     mycc.max_cycle = cfg.ccsd_max_cycle
@@ -65,11 +41,6 @@ def amplitudes(mf, cfg, spin):
         mycc.kernel()
         if not mycc.converged:
             raise RuntimeError(f"not converged in {mycc.max_cycle} cycles")
-        # Converging is not enough. At CN, R = 2.60 A the iteration lands on a
-        # different branch: the correlation energy jumps by 0.1 Ha from its
-        # neighbours and the largest amplitude reaches 1.09, which is not an
-        # expansion to build a circuit from. Where CCSD behaves the amplitudes
-        # stay near 0.05, so 0.5 separates the two cleanly.
         _t2 = mycc.t2
         _mx = max(float(np.abs(np.asarray(b)).max())
                   for b in (_t2 if isinstance(_t2, (tuple, list)) else (_t2,)))
@@ -111,9 +82,6 @@ def amplitudes(mf, cfg, spin):
 
 
 def _report(t1, t2, source, e_corr):
-    """One line per geometry: where the amplitudes came from and how large
-    they are. A t2 that has blown up makes a meaningless circuit, and the
-    only sign of it is this number."""
     blocks = t2 if isinstance(t2, tuple) else (t2,)
     mx = max(float(np.abs(b).max()) for b in blocks)
     print(f"    [amp] {source}  E_corr={e_corr:.8f}  max|t2|={mx:.4f}",
