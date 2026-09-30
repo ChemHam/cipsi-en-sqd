@@ -30,7 +30,7 @@ python run_scan.py inputs/lio2_14o.json --geometries 1.4:2.0   # a range
 
 Each geometry is written to `results/<name>/R_<value>.json` as soon as it finishes, together with `results/<name>/meta.json` (package versions and all settings). A scan that is stopped resumes where it left off; `--redo` recomputes existing geometries and `--threads` sets the number of PySCF threads (default 24, overridden by `OMP_NUM_THREADS`). All settings of a system (active space, geometries, target states, sampling and selection parameters) are in its input file under `inputs/`.
 
-N2 and C2H4 were computed with the notebooks `notebooks/sqd_n2.ipynb` and `notebooks/sqd_c2h4.ipynb`, which carry the same settings and write the whole scan to one file.
+N2 and C2H4 were computed with an earlier notebook implementation of the same procedure; the files in `data/N2/` and `data/C2H4/` are those results, one file per geometry.
 
 ## Data
 
@@ -44,7 +44,7 @@ N2 and C2H4 were computed with the notebooks `notebooks/sqd_n2.ipynb` and `noteb
 | CN | (9e, 16o) | *R* = 1.0–3.0 Å, 26 points | `R_1.000.json` … |
 | LiO2 | (13e, 14o) | *R*(Li–O2 midpoint) = 1.4–5.0 Å, 43 points | `R_1.400.json` … |
 
-All use cc-pVDZ with frozen 1s cores. Unzip the archives of a system into one folder before use. `meta.json` (OH, CN, LiO2) records the environment and settings of the run.
+All use cc-pVDZ with frozen 1s cores. Unzip the archives of a system into one folder before use.
 
 Main fields of each JSON file (energies in hartree, total energies):
 
@@ -62,10 +62,6 @@ Main fields of each JSON file (energies in hartree, total energies):
 The target states are S0, T1, T2 for N2; S0, S1, S2, T1, T2 for C2H4; and D0, D1, D2, Q1 for the radicals. The quantities in Table S1 (exclusive-region weight, uncovered reference weight) and in Figures 6 and S2–S4 are computed from `wf_amps` as defined in the paper; the `wf_analysis` field is an earlier diagnostic referenced to the lowest Ext-SQD root and is not what the paper reports.
 
 **N2 at R = 2.00 Å.** This point is the reference run of Table S2 (`"source"` field in the file), which replaces the point of the original scan so that Table S1 and Table S2 refer to the same calculation. The N2 pipeline is not bit-reproducible at a fixed random seed.
-
-## Earlier version
-
-The code and data of the original submission, which contained an error in the LUCJ sampling of the open-shell systems, are preserved under the tag [`v1-initial-submission`](https://github.com/ChemHam/cipsi-en-sqd/tree/v1-initial-submission).
 
 ## License and funding
 
